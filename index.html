@@ -1,1 +1,200 @@
-Hello World!!!
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f7f6f3;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f1f1;
+        }
+        .week-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .week-selector button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+        .task-item:hover {
+            background: #f1f1f1;
+        }
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .task-content {
+            flex-grow: 1;
+        }
+        .task-text {
+            border: none;
+            background: none;
+            width: 100%;
+            font-size: 16px;
+            padding: 4px;
+        }
+        .task-text:focus {
+            outline: none;
+            background: white;
+            border-radius: 4px;
+        }
+        .priority {
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-size: 12px;
+        }
+        .high { background: #ffe0e0; color: #ff4040; }
+        .medium { background: #fff3e0; color: #ff9040; }
+        .low { background: #e8f5e9; color: #2e7d32; }
+        .add-task {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 4px;
+            background: none;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.2s;
+        }
+        .add-task:hover {
+            border-color: #2196f3;
+            color: #2196f3;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .day-header {
+            font-weight: bold;
+            margin: 20px 0 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="week-selector">
+                <button onclick="previousWeek()">←</button>
+                <h2 id="current-week">Week of December 24, 2024</h2>
+                <button onclick="nextWeek()">→</button>
+            </div>
+        </div>
+
+        <div id="task-container"></div>
+        
+        <button class="add-task" onclick="addNewTask()">+ Add new task</button>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let tasks = {
+            'Monday': [],
+            'Tuesday': [],
+            'Wednesday': [],
+            'Thursday': [],
+            'Friday': [],
+            'Weekend': []
+        };
+
+        function updateWeekDisplay() {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-week').textContent = 
+                `Week of ${currentDate.toLocaleDateString(undefined, options)}`;
+        }
+
+        function previousWeek() {
+            currentDate.setDate(currentDate.getDate() - 7);
+            updateWeekDisplay();
+        }
+
+        function nextWeek() {
+            currentDate.setDate(currentDate.getDate() + 7);
+            updateWeekDisplay();
+        }
+
+        function toggleTask(taskId) {
+            const taskElement = document.getElementById(`task-${taskId}`);
+            const textElement = taskElement.querySelector('.task-text');
+            textElement.classList.toggle('completed');
+        }
+
+        function createTaskElement(text = '', day, priority = 'medium') {
+            const taskId = Date.now();
+            const taskHtml = `
+                <div class="task-item" id="task-${taskId}">
+                    <input type="checkbox" class="task-checkbox" onclick="toggleTask(${taskId})">
+                    <div class="task-content">
+                        <input type="text" class="task-text" value="${text}" placeholder="Enter task...">
+                    </div>
+                    <select class="priority ${priority}" onchange="this.className = 'priority ' + this.value">
+                        <option value="high" ${priority === 'high' ? 'selected' : ''}>High</option>
+                        <option value="medium" ${priority === 'medium' ? 'selected' : ''}>Medium</option>
+                        <option value="low" ${priority === 'low' ? 'selected' : ''}>Low</option>
+                    </select>
+                </div>
+            `;
+            return taskHtml;
+        }
+
+        function addNewTask() {
+            const firstDay = Object.keys(tasks)[0];
+            const taskContainer = document.querySelector(`#${firstDay}-tasks`);
+            taskContainer.insertAdjacentHTML('beforeend', createTaskElement('', firstDay));
+        }
+
+        function initializeTasks() {
+            let tasksHtml = '';
+            for (const day in tasks) {
+                tasksHtml += `
+                    <div class="day-header">${day}</div>
+                    <div id="${day}-tasks" class="task-list">
+                        ${createTaskElement('Sample task for ' + day, day)}
+                    </div>
+                `;
+            }
+            document.getElementById('task-container').innerHTML = tasksHtml;
+        }
+
+        // Initialize the widget
+        updateWeekDisplay();
+        initializeTasks();
+    </script>
+</body>
+</html>
